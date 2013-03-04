@@ -53,6 +53,10 @@ define(function (require, exports, module) {
             
             return loadPromise;
         }
+        
+        $(nodeConnection).on("ant.update", function (evt, data) {
+            console.log(data);
+        });
 
         chain(connect, loadAntDomain);
     });

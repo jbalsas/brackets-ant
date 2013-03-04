@@ -5,6 +5,8 @@
     
     "use strict";
     
+    var _domainManager = null;
+    
     /**
      * 
      */
@@ -28,17 +30,23 @@
         child = exec(cmd, function (error, stdout, stderr) {
             callback(error, stdout);
         });
+        
+        child.stdout.on("data", function (data) {
+            _domainManager.emitEvent("ant", "update", [data]);
+        });
     }
     
     /**
      *
      */
-    function init(DomainManager) {
-        if (!DomainManager.hasDomain("ant")) {
-            DomainManager.registerDomain("ant", {major: 0, minor: 1});
+    function init(domainManager) {
+        _domainManager = domainManager;
+        
+        if (!_domainManager.hasDomain("ant")) {
+            _domainManager.registerDomain("ant", {major: 0, minor: 1});
         }
         
-        DomainManager.registerCommand(
+        _domainManager.registerCommand(
             "ant",
             "build",
             cmdBuild,
@@ -48,6 +56,12 @@
             [{name: "result",
                 type: "string",
                 description: "The result of the execution"}]
+        );
+        
+        _domainManager.registerEvent(
+            "ant",
+            "update",
+            [{name: "data", type: "string"}]
         );
     }
     
