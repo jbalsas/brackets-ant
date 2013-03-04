@@ -63,9 +63,11 @@ define(function (require, exports, module) {
     
     // 
     function _runBuild() {
-        var path         = ProjectManager.getProjectRoot().fullPath;
+        var entry   = ProjectManager.getSelectedItem(),
+            path    = entry.fullPath.substring(0, entry.fullPath.lastIndexOf("/")),
+            file    = entry.name;
         
-        var buildPromise = nodeConnection.domains.ant.build(path, "build.xml", "compile")
+        var buildPromise = nodeConnection.domains.ant.build(path, file, "")
             .fail(function (err) {
                 console.error("[brackets-ant] failed to run ant.build", err);
             })
@@ -76,9 +78,10 @@ define(function (require, exports, module) {
         return buildPromise;
     }
     
-    CommandManager.register("Run build", RUN_BUILD, _runBuild);
+    CommandManager.register("Run build...", RUN_BUILD, _runBuild);
+    
+    var contextMenu = Menus.getContextMenu(Menus.ContextMenuIds.PROJECT_MENU);
+    contextMenu.addMenuItem(RUN_BUILD, "", Menus.LAST);
 
-    var menu = Menus.getMenu(Menus.AppMenuBar.NAVIGATE_MENU);
-    menu.addMenuItem(RUN_BUILD, "", Menus.LAST);
     
 });
