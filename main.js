@@ -12,7 +12,9 @@ define(function (require, exports, module) {
         NodeConnection  = brackets.getModule("utils/NodeConnection"),
         ProjectManager  = brackets.getModule("project/ProjectManager");
     
-    var RUN_BUILD    = "ant_build_cmd";
+    var RUN_BUILD       = "ant_build_cmd";
+    var SHOW_ANT_PANEL  = "show_ant_panel_cmd";
+    var TARGET_REGEXP   = new RegExp("<target name=\"([^\"])", "im");
     var nodeConnection;
     
     // Helper function that chains a series of promise-returning
@@ -62,28 +64,52 @@ define(function (require, exports, module) {
         chain(connect, loadAntDomain);
     });
     
+    function _isXML(fileEntry) {
+        return fileEntry && fileEntry.name.indexOf(".xml") >= 0;
+    }
+    
+    function _isAntBuild(fileEntry) {
+        
+        var checkBuildPromise = new $.Deferred();
+        
+        FileUtils.readAsText(fileEntry).done(function (rawText) {
+            if (TARGET_REGEXP.test(rawText)) {
+                checkBuildPromise.resolve();
+            } else {
+                checkBuildPromise.reject();
+            }
+        }).fail(function (err) {
+            checkBuildPromise.reject(err);
+        });
+        
+        return checkBuildPromise.promise();
+    }
+    
     // 
     function _runBuild() {
         var entry   = ProjectManager.getSelectedItem(),
             path    = entry.fullPath.substring(0, entry.fullPath.lastIndexOf("/")),
             file    = entry.name;
         
-        var buildPromise = nodeConnection.domains.ant.build(path, file, "")
-            .fail(function (err) {
-                console.error("[brackets-ant] failed to run ant.build", err);
-            })
-            .done(function (result) {
-                console.log("[brackets-ant] (%s)", result);
-            });
-        
-        return buildPromise;
+        _isAntBuild(entry).done(function () {
+            nodeConnection.domains.ant.build(path, file, "")
+                .fail(function (err) {
+                    console.error("[brackets-ant] failed to run ant.build", err);
+                })
+                .done(function (result) {
+                    console.log("[brackets-ant] (%s)", result);
+                });
+        }).fail(function (err) {
+            console.log(err);
+        });
     }
     
-    function _isXML(fileEntry) {
-        return fileEntry && fileEntry.name.indexOf(".xml") >= 0;
+    function _showAntPanel() {
+        console.log("SHOW ANT PANEL!!");
     }
     
     CommandManager.register("Run main target...", RUN_BUILD, _runBuild);
+    CommandManager.register("Show Ant Panel", SHOW_ANT_PANEL, _showAntPanel);
     
     var contextMenu     = Menus.getContextMenu(Menus.ContextMenuIds.PROJECT_MENU),
         buildMenuItem   = null;
@@ -100,5 +126,8 @@ define(function (require, exports, module) {
             }
         }
     });
+    
+    var ViewMenu = Menus.getMenu(Menus.AppMenuBar.VIEW_MENU);
+    ViewMenu.addMenuItem(SHOW_ANT_PANEL, "", Menus.LAST);
     
 });
