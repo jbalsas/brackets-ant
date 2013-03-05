@@ -7,6 +7,7 @@ define(function (require, exports, module) {
     var AppInit         = brackets.getModule("utils/AppInit"),
         CommandManager  = brackets.getModule("command/CommandManager"),
         ExtensionUtils  = brackets.getModule("utils/ExtensionUtils"),
+        FileUtils       = brackets.getModule("file/FileUtils"),
         Menus           = brackets.getModule("command/Menus"),
         NodeConnection  = brackets.getModule("utils/NodeConnection"),
         ProjectManager  = brackets.getModule("project/ProjectManager");
@@ -78,10 +79,26 @@ define(function (require, exports, module) {
         return buildPromise;
     }
     
-    CommandManager.register("Run build...", RUN_BUILD, _runBuild);
+    function _isXML(fileEntry) {
+        return fileEntry && fileEntry.name.indexOf(".xml") >= 0;
+    }
     
-    var contextMenu = Menus.getContextMenu(Menus.ContextMenuIds.PROJECT_MENU);
-    contextMenu.addMenuItem(RUN_BUILD, "", Menus.LAST);
-
+    CommandManager.register("Run main target...", RUN_BUILD, _runBuild);
+    
+    var contextMenu     = Menus.getContextMenu(Menus.ContextMenuIds.PROJECT_MENU),
+        buildMenuItem   = null;
+    
+    $(contextMenu).on("beforeContextMenuOpen", function (evt) {
+        if (_isXML(ProjectManager.getSelectedItem())) {
+            if (buildMenuItem === null) {
+                buildMenuItem = contextMenu.addMenuItem(RUN_BUILD, "", Menus.LAST);
+            }
+        } else {
+            if (buildMenuItem !== null) {
+                contextMenu.removeMenuItem(RUN_BUILD);
+                buildMenuItem = null;
+            }
+        }
+    });
     
 });
