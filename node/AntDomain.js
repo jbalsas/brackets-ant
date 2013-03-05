@@ -12,7 +12,7 @@
      */
     function cmdBuild(path, file, target, callback) {
         var exec    = require('child_process').exec,
-            cmd     = "ant",
+            cmd     = "echo 'ant",
             child;
 
         if (file) {
@@ -23,10 +23,12 @@
             cmd += " " + target;
         }
         
+        cmd += "' | bash --login";
+        
         if (path) {
             process.chdir(path);
         }
-                
+        
         child = exec(cmd, function (error, stdout, stderr) {
             callback(error, stdout);
         });
