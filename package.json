@@ -3,7 +3,7 @@
     "title": "Ant for Brackets",
     "description": "Shows context menu options to launch ant targets inside an xml file",
     "homepage": "https://github.com/jbalsas/brackets-ant",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "author": "Chema Balsas <jbalsas@gmail.com> (https://github.com/jbalsas)",
     "engines": {
         "brackets": ">=0.21.0"
