@@ -7,10 +7,8 @@ define(function (require, exports, module) {
     var AppInit             = brackets.getModule("utils/AppInit"),
         CommandManager      = brackets.getModule("command/CommandManager"),
         ExtensionUtils      = brackets.getModule("utils/ExtensionUtils"),
-        FileIndexManager    = brackets.getModule("project/FileIndexManager"),
         FileUtils           = brackets.getModule("file/FileUtils"),
         Menus               = brackets.getModule("command/Menus"),
-        NativeFileSystem    = brackets.getModule("file/NativeFileSystem"),
         NodeConnection      = brackets.getModule("utils/NodeConnection"),
         ProjectManager      = brackets.getModule("project/ProjectManager");
     
@@ -115,13 +113,6 @@ define(function (require, exports, module) {
         }).fail(function (err) {
             console.log(err);
         });
-    }
-    
-    function _showAntPanel() {
-        FileIndexManager.getFileInfoList("all")
-            .done(function (fileListResult) {
-                console.log(fileListResult);
-            });
     }
     
     function _removeAllContextMenuItems() {
